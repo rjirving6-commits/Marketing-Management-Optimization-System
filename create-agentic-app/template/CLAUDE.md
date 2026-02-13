@@ -117,7 +117,7 @@ The project includes technical documentation in `docs/`:
 - `docs/technical/ai/streaming.md` - AI streaming implementation guide
 - `docs/technical/ai/structured-data.md` - Structured data extraction
 - `docs/technical/react-markdown.md` - Markdown rendering guide
-- `docs/technical/betterauth/polar.md` - Polar payment integration
+- `docs/technical/stripe-payments.md` - Stripe payment integration
 - `docs/business/starter-prompt.md` - Business context for AI prompts
 
 ## Guidelines for AI Assistants
