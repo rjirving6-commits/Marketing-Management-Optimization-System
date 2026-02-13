@@ -29,7 +29,7 @@ If this boilerplate helped you build something awesome, consider buying me a cof
 
 Before you begin, ensure you have the following installed on your machine:
 
-- **Node.js**: Version 18.0 or higher (<a href="https://nodejs.org/" target="_blank">Download here</a>)
+- **Node.js**: Version 20.0 or higher (<a href="https://nodejs.org/" target="_blank">Download here</a>)
 - **Git**: For cloning the repository (<a href="https://git-scm.com/" target="_blank">Download here</a>)
 - **PostgreSQL**: Either locally installed or access to a hosted service like Vercel Postgres
 
@@ -192,12 +192,14 @@ npm run dev          # Start development server with Turbopack
 npm run build        # Build for production
 npm run start        # Start production server
 npm run lint         # Run ESLint
+npm run typecheck    # Run TypeScript checks
+npm run test         # Run starter smoke tests
 npm run db:generate  # Generate database migrations
 npm run db:migrate   # Run database migrations
 npm run db:push      # Push schema changes to database
 npm run db:studio    # Open Drizzle Studio (database GUI)
 npm run db:dev       # Push schema for development
-npm run db:reset     # Reset database (drop all tables)
+npm run db:reset     # Reset local database (destructive)
 ```
 
 ## 📖 Pages Overview

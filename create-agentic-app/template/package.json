@@ -4,15 +4,20 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "pnpm run db:migrate && next build",
+    "build:ci": "next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
+    "test": "node --test tests/**/*.test.mjs",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "db:dev": "drizzle-kit push",
     "db:reset": "drizzle-kit drop && drizzle-kit push"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.60",

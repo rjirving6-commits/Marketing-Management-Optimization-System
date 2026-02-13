@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth";
 
 type StatusLevel = "ok" | "warn" | "error";
 
@@ -28,6 +30,13 @@ interface DiagnosticsResponse {
 }
 
 export async function GET(req: Request) {
+  if (process.env.NODE_ENV === "production") {
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+  }
+
   const env = {
     POSTGRES_URL: Boolean(process.env.POSTGRES_URL),
     BETTER_AUTH_SECRET: Boolean(process.env.BETTER_AUTH_SECRET),
