@@ -1,225 +1,290 @@
-# Agentic Coding Boilerplate - AI Assistant Guidelines
+# CLAUDE.md
+## AI Application Boilerplate – Operator Guide
 
-## Project Overview
+This document defines how AI assistants (Claude Code) must operate inside this repository.
 
-This is a Next.js 15 boilerplate for building AI-powered applications with authentication, database, and modern UI components.
+It is intentionally opinionated.
+Follow it strictly.
 
-### Tech Stack
+---
 
-- **Framework**: Next.js 15 with App Router, React 19, TypeScript
-- **AI Integration**: Vercel AI SDK 5 + OpenRouter (access to 100+ AI models)
-- **Authentication**: BetterAuth with Google OAuth
-- **Database**: PostgreSQL with Drizzle ORM
-- **UI**: shadcn/ui components with Tailwind CSS 4
-- **Styling**: Tailwind CSS with dark mode support (next-themes)
+# 1. Project Overview
 
-## AI Integration with OpenRouter
+This repository is a Next.js App Router boilerplate for building AI-powered applications with:
 
-### Key Points
+- Authentication
+- PostgreSQL + Drizzle ORM
+- Modern UI (shadcn + Tailwind)
+- AI integration via OpenRouter
+- Server + API route architecture
 
-- This project uses **OpenRouter** as the AI provider, NOT direct OpenAI
-- OpenRouter provides access to 100+ AI models through a single unified API
-- Default model: `openai/gpt-5-mini` (configurable via `OPENROUTER_MODEL` env var)
-- Users browse models at: https://openrouter.ai/models
-- Users get API keys from: https://openrouter.ai/settings/keys
+Exact package versions are defined in `package.json`.
 
-### AI Implementation Files
+---
 
-- `src/app/api/chat/route.ts` - Chat API endpoint using OpenRouter
-- Package: `@openrouter/ai-sdk-provider` (not `@ai-sdk/openai`)
-- Import: `import { openrouter } from "@openrouter/ai-sdk-provider"`
+# 2. Core Architecture
 
-## Project Structure
+## Stack
 
-```
-src/
-├── app/                          # Next.js App Router
-│   ├── api/
-│   │   ├── auth/[...all]/       # Better Auth catch-all route
-│   │   ├── chat/route.ts        # AI chat endpoint (OpenRouter)
-│   │   └── diagnostics/         # System diagnostics
-│   ├── chat/page.tsx            # AI chat interface (protected)
-│   ├── dashboard/page.tsx       # User dashboard (protected)
-│   ├── profile/page.tsx         # User profile (protected)
-│   ├── page.tsx                 # Home/landing page
-│   └── layout.tsx               # Root layout
-├── components/
-│   ├── auth/                    # Authentication components
-│   │   ├── sign-in-button.tsx
-│   │   ├── sign-out-button.tsx
-│   │   └── user-profile.tsx
-│   ├── ui/                      # shadcn/ui components
-│   │   ├── button.tsx
-│   │   ├── card.tsx
-│   │   ├── dialog.tsx
-│   │   ├── dropdown-menu.tsx
-│   │   ├── avatar.tsx
-│   │   ├── badge.tsx
-│   │   ├── separator.tsx
-│   │   ├── mode-toggle.tsx      # Dark/light mode toggle
-│   │   └── github-stars.tsx
-│   ├── site-header.tsx          # Main navigation header
-│   ├── site-footer.tsx          # Footer component
-│   ├── theme-provider.tsx       # Dark mode provider
-│   ├── setup-checklist.tsx      # Setup guide component
-│   └── starter-prompt-modal.tsx # Starter prompts modal
-└── lib/
-    ├── auth.ts                  # Better Auth server config
-    ├── auth-client.ts           # Better Auth client hooks
-    ├── db.ts                    # Database connection
-    ├── schema.ts                # Drizzle schema (users, sessions, etc.)
-    └── utils.ts                 # Utility functions (cn, etc.)
-```
+- Framework: Next.js (App Router) + React + TypeScript
+- Database: PostgreSQL
+- ORM: Drizzle
+- Auth: BetterAuth (Google OAuth)
+- AI: Vercel AI SDK + OpenRouter
+- UI: shadcn/ui + Tailwind CSS
+- Theme: next-themes (dark mode enabled)
+- Package Manager: pnpm
 
-## Environment Variables
+Use `pnpm` for all commands.
 
-Required environment variables (see `env.example`):
+---
 
-```env
-# Database
-POSTGRES_URL=postgresql://user:password@localhost:5432/db_name
+# 3. How to Operate in This Repo
 
-# Better Auth
-BETTER_AUTH_SECRET=32-char-random-string
+Claude must follow this workflow unless explicitly instructed otherwise.
 
-# Google OAuth
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_CLIENT_SECRET=your-google-client-secret
+## Step 1 — Understand
+- Read relevant existing files.
+- Match patterns already in use.
+- Do not introduce new architectural styles without reason.
 
-# AI via OpenRouter
-OPENROUTER_API_KEY=sk-or-v1-your-key
-OPENROUTER_MODEL=openai/gpt-5-mini  # or any model from openrouter.ai/models
+## Step 2 — Plan
+- Provide a short plan (3–7 steps) before large changes.
+- Ask clarifying questions only if blocked.
 
-# App
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-```
+## Step 3 — Implement
+- Make small, deliberate changes.
+- Prefer modifying existing utilities over creating new ones.
+- Maintain consistency with existing patterns.
 
-## Available Scripts
+## Step 4 — Verify (MANDATORY)
 
-```bash
-npm run dev          # Start dev server (DON'T run this yourself - ask user)
-npm run build        # Build for production (runs db:migrate first)
-npm run start        # Start production server
-npm run lint         # Run ESLint (ALWAYS run after changes)
-npm run typecheck    # TypeScript type checking (ALWAYS run after changes)
-npm run db:generate  # Generate database migrations
-npm run db:migrate   # Run database migrations
-npm run db:push      # Push schema changes to database
-npm run db:studio    # Open Drizzle Studio (database GUI)
-npm run db:dev       # Push schema for development
-npm run db:reset     # Reset database (drop all tables)
-```
+After meaningful changes, run:
 
-## Documentation Files
+    pnpm lint && pnpm typecheck
 
-The project includes technical documentation in `docs/`:
+If changes affect runtime or build behavior, also run:
 
-- `docs/technical/ai/streaming.md` - AI streaming implementation guide
-- `docs/technical/ai/structured-data.md` - Structured data extraction
-- `docs/technical/react-markdown.md` - Markdown rendering guide
-- `docs/technical/stripe-payments.md` - Stripe payment integration
-- `docs/business/starter-prompt.md` - Business context for AI prompts
+    pnpm build
 
-## Guidelines for AI Assistants
+Do not consider work complete without verification.
 
-### CRITICAL RULES
+## Step 5 — Summarize
+Provide:
+- Files changed
+- What was added or modified
+- How it was verified
+- Any follow-up recommendations
 
-1. **ALWAYS run lint and typecheck** after completing changes:
+---
 
-   ```bash
-   npm run lint && npm run typecheck
-   ```
+# 4. Hard Rules
 
-2. **NEVER start the dev server yourself**
+## 4.1 No Long-Running Processes
 
-   - If you need dev server output, ask the user to provide it
-   - Don't run `npm run dev` or `pnpm dev`
+Do NOT start:
+- pnpm dev
+- next dev
+- Any watch process
 
-3. **Use OpenRouter, NOT OpenAI directly**
+If runtime logs are needed, ask the user to run the command and paste output.
 
-   - Import from `@openrouter/ai-sdk-provider`
-   - Use `openrouter()` function, not `openai()`
-   - Model names follow OpenRouter format: `provider/model-name`
+---
 
-4. **Styling Guidelines**
+## 4.2 AI Provider Discipline
 
-   - Stick to standard Tailwind CSS utility classes
-   - Use shadcn/ui color tokens (e.g., `bg-background`, `text-foreground`)
-   - Avoid custom colors unless explicitly requested
-   - Support dark mode with appropriate Tailwind classes
+This project uses:
 
-5. **Authentication**
+- OpenRouter via Vercel AI SDK
+- Package: @openrouter/ai-sdk-provider
 
-   - Server-side: Import from `@/lib/auth` (Better Auth instance)
-   - Client-side: Import hooks from `@/lib/auth-client`
-   - Protected routes should check session in Server Components
-   - Use existing auth components from `src/components/auth/`
+Never implement direct OpenAI calls unless explicitly requested.
 
-6. **Database Operations**
+Model selection is configured via:
 
-   - Use Drizzle ORM (imported from `@/lib/db`)
-   - Schema is defined in `@/lib/schema`
-   - Always run migrations after schema changes
-   - PostgreSQL is the database (not SQLite, MySQL, etc.)
+    OPENROUTER_MODEL
 
-7. **Component Creation**
+Do not hardcode models unless instructed.
 
-   - Use existing shadcn/ui components when possible
-   - Follow the established patterns in `src/components/ui/`
-   - Support both light and dark modes
-   - Use TypeScript with proper types
+---
 
-8. **API Routes**
-   - Follow Next.js 15 App Router conventions
-   - Use Route Handlers (route.ts files)
-   - Return Response objects
-   - Handle errors appropriately
+## 4.3 Secrets & Environment Variables
 
-### Best Practices
+- Never print or expose secrets.
+- Never commit secrets.
+- Do not read `.env*` files unless explicitly asked.
+- Any new environment variable must be added to `env.example`.
 
-- Read existing code patterns before creating new features
-- Maintain consistency with established file structure
-- Use the documentation files when implementing related features
-- Test changes with lint and typecheck before considering complete
-- When modifying AI functionality, refer to `docs/technical/ai/` guides
+---
 
-### Common Tasks
+## 4.4 Database Discipline
 
-**Adding a new page:**
+When modifying schema:
+
+1. Update `src/lib/schema.ts`
+2. Run:
+       pnpm db:generate
+       pnpm db:migrate
+3. Ensure migrations are included
+4. Do not break existing tables without explicit instruction
+
+PostgreSQL only.
+Do not introduce SQLite or other engines.
+
+---
+
+## 4.5 Authentication
+
+- Server: import from `@/lib/auth`
+- Client hooks: `@/lib/auth-client`
+- Protected pages must validate session server-side
+- Reuse existing auth components
+
+Do not replace auth provider without instruction.
+
+---
+
+## 4.6 UI & Styling
+
+- Use existing shadcn/ui components first
+- Use Tailwind utility classes
+- Use design tokens: `bg-background`, `text-foreground`, etc.
+- Support dark mode
+- Avoid introducing arbitrary custom colors
+
+---
+
+## 4.7 API Routes
+
+- Use App Router `route.ts` handlers
+- Return `Response` objects
+- Handle errors gracefully
+- Keep route logic minimal; extract reusable logic to `lib/`
+
+---
+
+# 5. Definition of Done (DoD)
+
+Work is complete only when:
+
+- pnpm lint passes
+- pnpm typecheck passes
+- pnpm build passes (if relevant)
+- New env vars are documented
+- Migrations generated (if schema changed)
+- Summary provided
+
+---
+
+# 6. Project Structure (High-Level)
+
+    src/
+      app/
+        api/
+        (routes)/
+      components/
+      lib/
+      docs/
+
+Conventions:
+
+- app/api/**/route.ts → API endpoints
+- app/[route]/page.tsx → Pages
+- lib/ → singletons + shared logic
+- components/ui/ → base UI components
+- docs/ → technical documentation
+
+Follow existing patterns before adding new structure.
+
+---
+
+# 7. AI Integration Notes
+
+AI endpoint:
+
+    src/app/api/chat/route.ts
+
+When modifying AI behavior:
+
+- Respect streaming patterns
+- Maintain OpenRouter provider usage
+- Do not introduce direct fetch calls to model APIs
+
+Reference documentation:
+
+    docs/technical/ai/
+
+---
+
+# 8. When Creating New Features
+
+## Adding a Page
 
 1. Create in `src/app/[route]/page.tsx`
-2. Use Server Components by default
-3. Add to navigation if needed
+2. Default to Server Components
+3. Add to navigation if appropriate
 
-**Adding a new API route:**
+## Adding an API Route
 
-1. Create in `src/app/api/[route]/route.ts`
-2. Export HTTP method handlers (GET, POST, etc.)
-3. Use proper TypeScript types
+1. Create `route.ts`
+2. Export HTTP methods
+3. Validate input
+4. Return proper responses
 
-**Adding authentication to a page:**
+## Adding DB Models
 
-1. Import auth instance: `import { auth } from "@/lib/auth"`
-2. Get session: `const session = await auth.api.getSession({ headers: await headers() })`
-3. Check session and redirect if needed
+1. Update schema
+2. Generate migration
+3. Apply migration
+4. Use typed queries
 
-**Working with the database:**
+---
 
-1. Update schema in `src/lib/schema.ts`
-2. Generate migration: `npm run db:generate`
-3. Apply migration: `npm run db:migrate`
-4. Import `db` from `@/lib/db` to query
+# 9. What Not to Change Without Explicit Instruction
 
-**Modifying AI chat:**
+- Auth wiring
+- Drizzle migration strategy
+- Environment variable names
+- App Router structure
+- AI provider implementation
+- Core database connection logic
 
-1. Backend: `src/app/api/chat/route.ts`
-2. Frontend: `src/app/chat/page.tsx`
-3. Reference streaming docs: `docs/technical/ai/streaming.md`
-4. Remember to use OpenRouter, not direct OpenAI
+These are foundational decisions.
 
-## Package Manager
+---
 
-This project uses **pnpm** (see `pnpm-lock.yaml`). When running commands:
+# 10. Project Setup Checklist (When Cloning Template)
 
-- Use `pnpm` instead of `npm` when possible
-- Scripts defined in package.json work with `pnpm run [script]`
+When spinning up a new app:
+
+- Update app name and metadata
+- Update README
+- Configure environment variables
+- Verify auth flow
+- Verify DB connection
+- Verify AI endpoint
+- Remove unused docs if not applicable
+
+---
+
+# 11. Design Philosophy
+
+This boilerplate prioritizes:
+
+- Simplicity over abstraction
+- Explicitness over magic
+- Stability over trendiness
+- Consistency across projects
+- Fast iteration with strong guardrails
+
+---
+
+# 12. Assistant Mindset
+
+When operating in this repo:
+
+- Do not over-engineer.
+- Do not introduce unnecessary abstractions.
+- Do not change architecture casually.
+- Make the smallest change that solves the problem.
+- Prefer clarity over cleverness.
