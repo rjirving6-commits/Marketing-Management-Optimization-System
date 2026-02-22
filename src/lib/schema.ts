@@ -1,4 +1,12 @@
-import { pgTable, text, timestamp, boolean } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  timestamp,
+  boolean,
+  integer,
+  real,
+  jsonb,
+} from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -58,4 +66,116 @@ export const verification = pgTable("verification", {
     .defaultNow()
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
+});
+
+// ─── Marketing Domain Tables ────────────────────────────────────
+
+export const campaigns = pgTable("campaigns", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  platform: text("platform").notNull(),
+  status: text("status").notNull(),
+  budget: real("budget").notNull(),
+  spent: real("spent").notNull().default(0),
+  audienceSegment: text("audience_segment").notNull(),
+  icpPersona: text("icp_persona").notNull(),
+  funnelStage: text("funnel_stage").notNull(),
+  offerType: text("offer_type").notNull(),
+  tags: jsonb("tags").$type<string[]>().notNull().default([]),
+  startDate: text("start_date").notNull(),
+  endDate: text("end_date"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .notNull(),
+});
+
+export const assets = pgTable("assets", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  type: text("type").notNull(),
+  status: text("status").notNull(),
+  platform: text("platform").notNull(),
+  campaignId: text("campaign_id")
+    .notNull()
+    .references(() => campaigns.id, { onDelete: "cascade" }),
+  audienceSegment: text("audience_segment").notNull(),
+  icpPersona: text("icp_persona").notNull(),
+  funnelStage: text("funnel_stage").notNull(),
+  offerType: text("offer_type").notNull(),
+  creativeTheme: text("creative_theme").notNull(),
+  hook: text("hook").notNull(),
+  cta: text("cta").notNull(),
+  bodyContent: text("body_content").notNull(),
+  version: integer("version").notNull().default(1),
+  parentAssetId: text("parent_asset_id"),
+  fileUrl: text("file_url"),
+  thumbnailUrl: text("thumbnail_url"),
+  landingPageUrl: text("landing_page_url"),
+  tags: jsonb("tags").$type<string[]>().notNull().default([]),
+  notes: text("notes").notNull().default(""),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .notNull(),
+});
+
+export const metricSnapshots = pgTable("metric_snapshots", {
+  id: text("id").primaryKey(),
+  assetId: text("asset_id")
+    .notNull()
+    .references(() => assets.id, { onDelete: "cascade" }),
+  date: text("date").notNull(),
+  impressions: integer("impressions").notNull().default(0),
+  reach: integer("reach").notNull().default(0),
+  clicks: integer("clicks").notNull().default(0),
+  landingPageClicks: integer("landing_page_clicks").notNull().default(0),
+  conversions: integer("conversions").notNull().default(0),
+  leads: integer("leads").notNull().default(0),
+  demos: integer("demos").notNull().default(0),
+  spend: real("spend").notNull().default(0),
+  cpm: real("cpm").notNull().default(0),
+  ctr: real("ctr").notNull().default(0),
+  cpc: real("cpc").notNull().default(0),
+  conversionRate: real("conversion_rate").notNull().default(0),
+  cpl: real("cpl").notNull().default(0),
+  costPerDemo: real("cost_per_demo").notNull().default(0),
+  roas: real("roas").notNull().default(0),
+});
+
+export const insights = pgTable("insights", {
+  id: text("id").primaryKey(),
+  type: text("type").notNull(),
+  assetId: text("asset_id").references(() => assets.id, {
+    onDelete: "set null",
+  }),
+  campaignId: text("campaign_id").references(() => campaigns.id, {
+    onDelete: "set null",
+  }),
+  title: text("title").notNull(),
+  summary: text("summary").notNull(),
+  details: text("details").notNull(),
+  confidence: real("confidence").notNull(),
+  impactLevel: text("impact_level").notNull(),
+  actionItems: jsonb("action_items").$type<string[]>().notNull().default([]),
+  generatedContent: text("generated_content"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const alerts = pgTable("alerts", {
+  id: text("id").primaryKey(),
+  type: text("type").notNull(),
+  severity: text("severity").notNull(),
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  assetId: text("asset_id").references(() => assets.id, {
+    onDelete: "set null",
+  }),
+  campaignId: text("campaign_id").references(() => campaigns.id, {
+    onDelete: "set null",
+  }),
+  dismissed: boolean("dismissed").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
