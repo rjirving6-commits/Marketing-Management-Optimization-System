@@ -2,6 +2,8 @@ import type {
   Asset,
   AssetFilters,
   AssetWithMetrics,
+  AutoAction,
+  AutoActionStatus,
   Campaign,
   CampaignSummary,
   ExecutiveSummary,
@@ -62,6 +64,13 @@ export interface OrgRepository {
   removeMember(memberId: string): Promise<boolean>;
 }
 
+export interface AutoActionRepository {
+  getAll(filters?: { status?: AutoActionStatus }): Promise<AutoAction[]>;
+  getById(id: string): Promise<AutoAction | null>;
+  create(action: Omit<AutoAction, "id" | "createdAt">): Promise<AutoAction>;
+  updateStatus(id: string, status: AutoActionStatus): Promise<AutoAction | null>;
+}
+
 export interface Repositories {
   assets: AssetRepository;
   campaigns: CampaignRepository;
@@ -69,4 +78,5 @@ export interface Repositories {
   insights: InsightRepository;
   alerts: AlertRepository;
   orgs: OrgRepository;
+  autoActions: AutoActionRepository;
 }

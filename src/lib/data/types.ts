@@ -259,6 +259,32 @@ export interface ExecutiveSummary {
   alertCount: number;
 }
 
+// ─── Automation Types ────────────────────────────────────────────
+
+export type AutoActionType =
+  | "pause_fatigued"
+  | "reallocate_budget"
+  | "suggest_creative_rotation"
+  | "escalate_alert";
+
+export type AutoActionStatus = "pending" | "approved" | "executed" | "rejected";
+
+export type AutoActionTargetType = "asset" | "campaign";
+
+export interface AutoAction {
+  id: string;
+  orgId: string | null;
+  type: AutoActionType;
+  targetType: AutoActionTargetType;
+  targetId: string;
+  description: string;
+  status: AutoActionStatus;
+  triggeredBy: string;
+  metadata: Record<string, unknown> | null;
+  createdAt: string;
+  executedAt: string | null;
+}
+
 // ─── Filter Types ────────────────────────────────────────────────
 
 export interface AssetFilters {

@@ -68,10 +68,41 @@ export const verification = pgTable("verification", {
     .notNull(),
 });
 
+// ─── Organization Tables ────────────────────────────────────────
+
+export const organizations = pgTable("organizations", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  slug: text("slug").notNull().unique(),
+  plan: text("plan").notNull().default("free"),
+  stripeCustomerId: text("stripe_customer_id"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .notNull(),
+});
+
+export const orgMembers = pgTable("org_members", {
+  id: text("id").primaryKey(),
+  orgId: text("org_id")
+    .notNull()
+    .references(() => organizations.id, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  role: text("role").notNull().default("member"),
+  invitedAt: timestamp("invited_at").defaultNow().notNull(),
+  joinedAt: timestamp("joined_at"),
+});
+
 // ─── Marketing Domain Tables ────────────────────────────────────
 
 export const campaigns = pgTable("campaigns", {
   id: text("id").primaryKey(),
+  orgId: text("org_id").references(() => organizations.id, {
+    onDelete: "cascade",
+  }),
   name: text("name").notNull(),
   platform: text("platform").notNull(),
   status: text("status").notNull(),
@@ -93,6 +124,9 @@ export const campaigns = pgTable("campaigns", {
 
 export const assets = pgTable("assets", {
   id: text("id").primaryKey(),
+  orgId: text("org_id").references(() => organizations.id, {
+    onDelete: "cascade",
+  }),
   name: text("name").notNull(),
   type: text("type").notNull(),
   status: text("status").notNull(),
@@ -124,6 +158,9 @@ export const assets = pgTable("assets", {
 
 export const metricSnapshots = pgTable("metric_snapshots", {
   id: text("id").primaryKey(),
+  orgId: text("org_id").references(() => organizations.id, {
+    onDelete: "cascade",
+  }),
   assetId: text("asset_id")
     .notNull()
     .references(() => assets.id, { onDelete: "cascade" }),
@@ -147,6 +184,9 @@ export const metricSnapshots = pgTable("metric_snapshots", {
 
 export const insights = pgTable("insights", {
   id: text("id").primaryKey(),
+  orgId: text("org_id").references(() => organizations.id, {
+    onDelete: "cascade",
+  }),
   type: text("type").notNull(),
   assetId: text("asset_id").references(() => assets.id, {
     onDelete: "set null",
@@ -164,8 +204,27 @@ export const insights = pgTable("insights", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const automationActions = pgTable("automation_actions", {
+  id: text("id").primaryKey(),
+  orgId: text("org_id").references(() => organizations.id, {
+    onDelete: "cascade",
+  }),
+  type: text("type").notNull(),
+  targetType: text("target_type").notNull(),
+  targetId: text("target_id").notNull(),
+  description: text("description").notNull(),
+  status: text("status").notNull().default("pending"),
+  triggeredBy: text("triggered_by").notNull(),
+  metadata: jsonb("metadata").$type<Record<string, unknown>>(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  executedAt: timestamp("executed_at"),
+});
+
 export const alerts = pgTable("alerts", {
   id: text("id").primaryKey(),
+  orgId: text("org_id").references(() => organizations.id, {
+    onDelete: "cascade",
+  }),
   type: text("type").notNull(),
   severity: text("severity").notNull(),
   title: text("title").notNull(),

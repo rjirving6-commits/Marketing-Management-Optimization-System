@@ -4,6 +4,7 @@ import type {
   MetricSnapshot,
   Insight,
   Alert,
+  AutoAction,
 } from "../types";
 
 // ─── Campaigns ───────────────────────────────────────────────────
@@ -11,6 +12,7 @@ import type {
 export const seedCampaigns: Campaign[] = [
   {
     id: "camp-001",
+    orgId: null,
     name: "LinkedIn B2B Lead Gen — Q1 2026",
     platform: "linkedin",
     status: "active",
@@ -28,6 +30,7 @@ export const seedCampaigns: Campaign[] = [
   },
   {
     id: "camp-002",
+    orgId: null,
     name: "Google Search — Demo Bookings",
     platform: "google",
     status: "active",
@@ -45,6 +48,7 @@ export const seedCampaigns: Campaign[] = [
   },
   {
     id: "camp-003",
+    orgId: null,
     name: "YouTube Brand Awareness — Thought Leadership",
     platform: "youtube",
     status: "active",
@@ -68,6 +72,7 @@ export const seedAssets: Asset[] = [
   // Campaign 1: LinkedIn Lead Gen
   {
     id: "asset-001",
+    orgId: null,
     name: "LinkedIn Carousel — 5 Signs Your Marketing Is Fatigued",
     type: "social_post",
     status: "active",
@@ -93,6 +98,7 @@ export const seedAssets: Asset[] = [
   },
   {
     id: "asset-002",
+    orgId: null,
     name: "LinkedIn Single Image — ROI Calculator Promo",
     type: "image",
     status: "fatigued",
@@ -118,6 +124,7 @@ export const seedAssets: Asset[] = [
   },
   {
     id: "asset-003",
+    orgId: null,
     name: "LinkedIn Video — Customer Success Story: Acme Corp",
     type: "video",
     status: "active",
@@ -143,6 +150,7 @@ export const seedAssets: Asset[] = [
   },
   {
     id: "asset-004",
+    orgId: null,
     name: "LinkedIn Lead Gen Form — Whitepaper Download",
     type: "lead_magnet",
     status: "active",
@@ -168,6 +176,7 @@ export const seedAssets: Asset[] = [
   },
   {
     id: "asset-005",
+    orgId: null,
     name: "LinkedIn Text Ad — Quick Demo CTA",
     type: "ad",
     status: "paused",
@@ -195,6 +204,7 @@ export const seedAssets: Asset[] = [
   // Campaign 2: Google Search — Demo Bookings
   {
     id: "asset-006",
+    orgId: null,
     name: "Google RSA — Marketing Optimization Platform",
     type: "ad",
     status: "active",
@@ -220,6 +230,7 @@ export const seedAssets: Asset[] = [
   },
   {
     id: "asset-007",
+    orgId: null,
     name: "Google RSA — Creative Fatigue Solution",
     type: "ad",
     status: "active",
@@ -245,6 +256,7 @@ export const seedAssets: Asset[] = [
   },
   {
     id: "asset-008",
+    orgId: null,
     name: "Landing Page — Demo Booking (Main)",
     type: "landing_page",
     status: "active",
@@ -270,6 +282,7 @@ export const seedAssets: Asset[] = [
   },
   {
     id: "asset-009",
+    orgId: null,
     name: "Google RSA — Competitor Comparison",
     type: "ad",
     status: "active",
@@ -295,6 +308,7 @@ export const seedAssets: Asset[] = [
   },
   {
     id: "asset-010",
+    orgId: null,
     name: "Google Display — Retargeting Banner Set",
     type: "image",
     status: "active",
@@ -322,6 +336,7 @@ export const seedAssets: Asset[] = [
   // Campaign 3: YouTube Brand Awareness
   {
     id: "asset-011",
+    orgId: null,
     name: "YouTube Pre-Roll — Why Marketing Teams Burn Out",
     type: "video",
     status: "active",
@@ -347,6 +362,7 @@ export const seedAssets: Asset[] = [
   },
   {
     id: "asset-012",
+    orgId: null,
     name: "YouTube In-Stream — Product Demo Teaser",
     type: "video",
     status: "active",
@@ -372,6 +388,7 @@ export const seedAssets: Asset[] = [
   },
   {
     id: "asset-013",
+    orgId: null,
     name: "YouTube Bumper — Brand Tagline",
     type: "video",
     status: "active",
@@ -397,6 +414,7 @@ export const seedAssets: Asset[] = [
   },
   {
     id: "asset-014",
+    orgId: null,
     name: "Email Sequence — Webinar Follow-Up (3-part)",
     type: "email",
     status: "active",
@@ -422,6 +440,7 @@ export const seedAssets: Asset[] = [
   },
   {
     id: "asset-015",
+    orgId: null,
     name: "LinkedIn Sponsored Article — The Death of Spray-and-Pray Marketing",
     type: "copy",
     status: "draft",
@@ -447,6 +466,7 @@ export const seedAssets: Asset[] = [
   },
   {
     id: "asset-016",
+    orgId: null,
     name: "Landing Page — Webinar Registration",
     type: "landing_page",
     status: "active",
@@ -596,6 +616,7 @@ export const seedMetrics: MetricSnapshot[] = [
 export const seedInsights: Insight[] = [
   {
     id: "insight-001",
+    orgId: null,
     type: "diagnosis",
     assetId: "asset-002",
     campaignId: "camp-001",
@@ -631,6 +652,7 @@ The audience has been overexposed to this creative. The single-image format with
   },
   {
     id: "insight-002",
+    orgId: null,
     type: "recommendation",
     assetId: "asset-001",
     campaignId: "camp-001",
@@ -663,6 +685,7 @@ The audience has been overexposed to this creative. The single-image format with
   },
   {
     id: "insight-003",
+    orgId: null,
     type: "explanation",
     assetId: "asset-005",
     campaignId: "camp-001",
@@ -696,6 +719,7 @@ Move this asset to Campaign 2 (Google Search — Demo Bookings) where the audien
   },
   {
     id: "insight-004",
+    orgId: null,
     type: "recommendation",
     assetId: null,
     campaignId: "camp-002",
@@ -728,6 +752,7 @@ Reallocate 30% of display retargeting budget ($350/day → $245/day) to search R
   },
   {
     id: "insight-005",
+    orgId: null,
     type: "generation",
     assetId: "asset-002",
     campaignId: "camp-001",
@@ -769,6 +794,7 @@ Replacing the fatigued single-image ROI Calculator ad with a carousel that tells
   },
   {
     id: "insight-006",
+    orgId: null,
     type: "diagnosis",
     assetId: "asset-010",
     campaignId: "camp-002",
@@ -803,6 +829,7 @@ The retargeting audience pool is saturated. With only ~5,000 unique visitors per
 export const seedAlerts: Alert[] = [
   {
     id: "alert-001",
+    orgId: null,
     type: "fatigue",
     severity: "high",
     title: "Creative Fatigue: ROI Calculator Ad",
@@ -814,6 +841,7 @@ export const seedAlerts: Alert[] = [
   },
   {
     id: "alert-002",
+    orgId: null,
     type: "performance_drop",
     severity: "medium",
     title: "Display Retargeting CTR Declining",
@@ -825,6 +853,7 @@ export const seedAlerts: Alert[] = [
   },
   {
     id: "alert-003",
+    orgId: null,
     type: "budget_pacing",
     severity: "medium",
     title: "Campaign 1 Budget Pacing Ahead",
@@ -836,6 +865,7 @@ export const seedAlerts: Alert[] = [
   },
   {
     id: "alert-004",
+    orgId: null,
     type: "opportunity",
     severity: "low",
     title: "Top Performer Opportunity",
@@ -847,6 +877,7 @@ export const seedAlerts: Alert[] = [
   },
   {
     id: "alert-005",
+    orgId: null,
     type: "anomaly",
     severity: "low",
     title: "New Asset Showing Promise",
@@ -855,5 +886,80 @@ export const seedAlerts: Alert[] = [
     campaignId: "camp-002",
     createdAt: "2026-02-19T10:00:00Z",
     dismissed: false,
+  },
+];
+
+// ─── Automation Actions ─────────────────────────────────────────
+
+export const seedAutoActions: AutoAction[] = [
+  {
+    id: "auto-001",
+    orgId: null,
+    type: "pause_fatigued",
+    targetType: "asset",
+    targetId: "asset-002",
+    description:
+      'Auto-paused "LinkedIn Single Image — ROI Calculator Promo" due to fatigue score of 82.',
+    status: "executed",
+    triggeredBy: "pause_fatigued",
+    metadata: { fatigueScore: 82, previousStatus: "active" },
+    createdAt: "2026-02-15T10:05:00Z",
+    executedAt: "2026-02-15T10:05:00Z",
+  },
+  {
+    id: "auto-002",
+    orgId: null,
+    type: "reallocate_budget",
+    targetType: "campaign",
+    targetId: "camp-001",
+    description:
+      'Budget overpacing on "LinkedIn B2B Lead Gen — Q1 2026": spent 66% with 47% of time elapsed (30% over pace).',
+    status: "pending",
+    triggeredBy: "reallocate_budget",
+    metadata: { spentFraction: 0.66, elapsedFraction: 0.47, overpacePercent: 40 },
+    createdAt: "2026-02-17T09:10:00Z",
+    executedAt: null,
+  },
+  {
+    id: "auto-003",
+    orgId: null,
+    type: "suggest_creative_rotation",
+    targetType: "asset",
+    targetId: "asset-010",
+    description:
+      'Suggest creative rotation for "Google Display — Retargeting Banner Set": declining CTR with fatigue score 58.',
+    status: "pending",
+    triggeredBy: "suggest_creative_rotation",
+    metadata: { fatigueScore: 58, trendDirection: "down" },
+    createdAt: "2026-02-18T08:15:00Z",
+    executedAt: null,
+  },
+  {
+    id: "auto-004",
+    orgId: null,
+    type: "escalate_alert",
+    targetType: "asset",
+    targetId: "asset-002",
+    description:
+      'Alert "Creative Fatigue: ROI Calculator Ad" has been active for over 48 hours without dismissal.',
+    status: "rejected",
+    triggeredBy: "escalate_alert",
+    metadata: { alertId: "alert-001", alertAge: 72 },
+    createdAt: "2026-02-18T10:00:00Z",
+    executedAt: null,
+  },
+  {
+    id: "auto-005",
+    orgId: null,
+    type: "pause_fatigued",
+    targetType: "asset",
+    targetId: "asset-010",
+    description:
+      'Review suggested: pause "Google Display — Retargeting Banner Set" with fatigue score of 65.',
+    status: "pending",
+    triggeredBy: "pause_fatigued",
+    metadata: { fatigueScore: 65 },
+    createdAt: "2026-02-19T08:00:00Z",
+    executedAt: null,
   },
 ];
