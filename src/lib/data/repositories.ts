@@ -9,6 +9,9 @@ import type {
   InsightType,
   MetricSnapshot,
   Alert,
+  Organization,
+  OrgMember,
+  OrgRole,
 } from "./types";
 
 export interface AssetRepository {
@@ -44,6 +47,19 @@ export interface AlertRepository {
   getAll(): Promise<Alert[]>;
   getActive(): Promise<Alert[]>;
   dismiss(id: string): Promise<void>;
+  create(alert: Omit<Alert, "id" | "createdAt">): Promise<Alert>;
+}
+
+export interface OrgRepository {
+  getById(id: string): Promise<Organization | null>;
+  getBySlug(slug: string): Promise<Organization | null>;
+  create(data: Omit<Organization, "id" | "createdAt" | "updatedAt">): Promise<Organization>;
+  update(id: string, data: Partial<Pick<Organization, "name" | "slug" | "plan" | "stripeCustomerId">>): Promise<Organization | null>;
+  getUserOrgs(userId: string): Promise<(Organization & { role: OrgRole })[]>;
+  getMembers(orgId: string): Promise<OrgMember[]>;
+  addMember(orgId: string, userId: string, role: OrgRole): Promise<OrgMember>;
+  updateMemberRole(memberId: string, role: OrgRole): Promise<OrgMember | null>;
+  removeMember(memberId: string): Promise<boolean>;
 }
 
 export interface Repositories {
@@ -52,4 +68,5 @@ export interface Repositories {
   metrics: MetricRepository;
   insights: InsightRepository;
   alerts: AlertRepository;
+  orgs: OrgRepository;
 }

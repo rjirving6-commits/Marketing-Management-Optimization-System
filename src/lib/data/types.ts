@@ -58,10 +58,39 @@ export type ImpactLevel = "low" | "medium" | "high";
 
 export type TrendDirection = "up" | "down" | "flat";
 
+// ─── Organization Types ─────────────────────────────────────────
+
+export type OrgRole = "owner" | "admin" | "member" | "viewer";
+
+export type OrgPlan = "free" | "pro" | "enterprise";
+
+export interface Organization {
+  id: string;
+  name: string;
+  slug: string;
+  plan: OrgPlan;
+  stripeCustomerId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface OrgMember {
+  id: string;
+  orgId: string;
+  userId: string;
+  role: OrgRole;
+  invitedAt: string;
+  joinedAt: string | null;
+  userName?: string;
+  userEmail?: string;
+  userImage?: string | null;
+}
+
 // ─── Core Entities ───────────────────────────────────────────────
 
 export interface Campaign {
   id: string;
+  orgId: string | null;
   name: string;
   platform: Platform;
   status: CampaignStatus;
@@ -80,6 +109,7 @@ export interface Campaign {
 
 export interface Asset {
   id: string;
+  orgId: string | null;
   name: string;
   type: AssetType;
   status: AssetStatus;
@@ -143,10 +173,13 @@ export interface DerivedMetrics {
   scrollStopRate: number;
   hookRetention: number;
   trendDirection: TrendDirection;
+  predictedFatigueDate: string | null; // ISO date
+  anomalyScore: number; // 0-100
 }
 
 export interface Insight {
   id: string;
+  orgId: string | null;
   type: InsightType;
   assetId: string | null;
   campaignId: string | null;
@@ -185,6 +218,7 @@ export interface CampaignSummary {
 
 export interface Alert {
   id: string;
+  orgId: string | null;
   type: AlertType;
   severity: AlertSeverity;
   title: string;
@@ -215,6 +249,11 @@ export interface ExecutiveSummary {
     dropoffRate: number;
   }[];
   budgetSuggestions: string[];
+  forecasts: {
+    nextWeekCpl: number;
+    nextWeekSpend: number;
+    nextWeekLeads: number;
+  };
   activeCampaigns: number;
   activeAssets: number;
   alertCount: number;

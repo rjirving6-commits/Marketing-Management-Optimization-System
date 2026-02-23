@@ -26,4 +26,16 @@ export class MockAlertRepository implements AlertRepository {
       alert.dismissed = true;
     }
   }
+
+  async create(
+    data: Omit<Alert, "id" | "createdAt">
+  ): Promise<Alert> {
+    const alert: Alert = {
+      ...data,
+      id: `alert-${String(store.alerts.length + 1).padStart(3, "0")}`,
+      createdAt: new Date().toISOString(),
+    };
+    store.alerts.push(alert);
+    return alert;
+  }
 }

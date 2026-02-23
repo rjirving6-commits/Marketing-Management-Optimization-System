@@ -10,10 +10,12 @@ import type {
   TrendDirection,
 } from "../types";
 import type { AssetRepository } from "../repositories";
+import { mean, linearRegression, anomalyScore } from "@/lib/ml";
 
 function rowToAsset(row: typeof assets.$inferSelect): Asset {
   return {
     id: row.id,
+    orgId: row.orgId,
     name: row.name,
     type: row.type as Asset["type"],
     status: row.status as Asset["status"],
@@ -89,15 +91,31 @@ function computeDerivedMetrics(
   if (velocityPct > 5) trendDirection = "up";
   else if (velocityPct < -5) trendDirection = "down";
 
-  const peakCtr = Math.max(...sorted.map((m) => m.ctr));
-  const latestCtr = sorted[sorted.length - 1].ctr;
-  const declineRatio = peakCtr > 0 ? 1 - latestCtr / peakCtr : 0;
-  const daysRunning = sorted.length;
-  const fatigueScore = Math.min(
-    100,
-    Math.round(declineRatio * 60 + Math.min(daysRunning, 30) * 1.3)
+  // Scroll stop rate: mean(clicks/impressions) over recent 7 days
+  const scrollStopRate = mean(
+    recent.map((m) => (m.impressions > 0 ? m.clicks / m.impressions : 0))
   );
 
+  // Hook retention: mean(conversions/clicks) over recent 7 days
+  const hookRetention = mean(
+    recent.map((m) => (m.clicks > 0 ? m.conversions / m.clicks : 0))
+  );
+
+  // Fatigue score using exponential decay model with regression slope
+  const ctrSeries = sorted.map((m) => m.ctr);
+  const regression = linearRegression(ctrSeries);
+  const peakCtr = Math.max(...ctrSeries);
+  const daysRunning = sorted.length;
+  const decayRate = Math.max(0, -regression.slope);
+  const fatigueScore = Math.min(
+    100,
+    Math.round(
+      (1 - Math.exp(-decayRate * daysRunning * 10)) * 70 +
+        Math.min(daysRunning, 30) * 1.0
+    )
+  );
+
+  // Half-life: days until CTR dropped to 50% of peak
   let halfLife: number | null = null;
   const halfPeak = peakCtr * 0.5;
   const peakIdx = sorted.findIndex((m) => m.ctr === peakCtr);
@@ -108,18 +126,37 @@ function computeDerivedMetrics(
     }
   }
 
+  // Predicted fatigue date: linear regression on CTR → find x where line crosses 50% of peak
+  let predictedFatigueDate: string | null = null;
+  if (peakCtr > 0 && regression.slope < 0) {
+    const targetCtr = peakCtr * 0.5;
+    const xAtTarget = (targetCtr - regression.intercept) / regression.slope;
+    const daysFromNow = Math.ceil(xAtTarget - (sorted.length - 1));
+    if (daysFromNow > 0 && daysFromNow < 365) {
+      const futureDate = new Date();
+      futureDate.setDate(futureDate.getDate() + daysFromNow);
+      predictedFatigueDate = futureDate.toISOString().split("T")[0];
+    }
+  }
+
+  // Anomaly score from CTR series
+  const anomaly = anomalyScore(ctrSeries);
+
   return {
     fatigueScore,
     assetHalfLife: halfLife,
     performanceVelocity: Math.round(velocityPct * 100) / 100,
-    scrollStopRate: 0.3 + Math.random() * 0.4,
-    hookRetention: 0.4 + Math.random() * 0.35,
+    scrollStopRate: Math.round(scrollStopRate * 10000) / 10000,
+    hookRetention: Math.round(hookRetention * 10000) / 10000,
     trendDirection,
+    predictedFatigueDate,
+    anomalyScore: anomaly,
   };
 }
 
-function buildWhereConditions(filters?: AssetFilters) {
+function buildWhereConditions(filters?: AssetFilters, orgId?: string) {
   const conditions = [];
+  if (orgId) conditions.push(eq(assets.orgId, orgId));
   if (filters?.platform) conditions.push(eq(assets.platform, filters.platform));
   if (filters?.funnelStage)
     conditions.push(eq(assets.funnelStage, filters.funnelStage));
@@ -192,8 +229,10 @@ function sortAssetsWithMetrics(
 }
 
 export class DrizzleAssetRepository implements AssetRepository {
+  constructor(private orgId?: string) {}
+
   async getAll(filters?: AssetFilters): Promise<Asset[]> {
-    const where = buildWhereConditions(filters);
+    const where = buildWhereConditions(filters, this.orgId);
     const rows = await db.select().from(assets).where(where);
     return rows.map(rowToAsset);
   }
@@ -204,7 +243,7 @@ export class DrizzleAssetRepository implements AssetRepository {
   }
 
   async getWithMetrics(filters?: AssetFilters): Promise<AssetWithMetrics[]> {
-    const where = buildWhereConditions(filters);
+    const where = buildWhereConditions(filters, this.orgId);
     const assetRows = await db.select().from(assets).where(where);
 
     const result: AssetWithMetrics[] = [];
@@ -273,6 +312,7 @@ export class DrizzleAssetRepository implements AssetRepository {
       .insert(assets)
       .values({
         id,
+        orgId: this.orgId ?? data.orgId,
         name: data.name,
         type: data.type,
         status: data.status,

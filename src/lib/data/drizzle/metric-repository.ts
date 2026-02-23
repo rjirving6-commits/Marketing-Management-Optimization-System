@@ -1,4 +1,4 @@
-import { eq, gte, asc, desc } from "drizzle-orm";
+import { eq, gte, asc, desc, and } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
   metricSnapshots,
@@ -13,6 +13,7 @@ import type {
   FunnelStage,
 } from "../types";
 import type { MetricRepository } from "../repositories";
+import { mean, forecast } from "@/lib/ml";
 
 function rowToMetric(row: typeof metricSnapshots.$inferSelect): MetricSnapshot {
   return {
@@ -38,6 +39,7 @@ function rowToMetric(row: typeof metricSnapshots.$inferSelect): MetricSnapshot {
 }
 
 export class DrizzleMetricRepository implements MetricRepository {
+  constructor(private orgId?: string) {}
   async getByAssetId(
     assetId: string,
     days?: number
@@ -73,14 +75,21 @@ export class DrizzleMetricRepository implements MetricRepository {
     cutoff.setDate(cutoff.getDate() - days);
     const cutoffStr = cutoff.toISOString().split("T")[0];
 
+    const metricConditions = [gte(metricSnapshots.date, cutoffStr)];
+    if (this.orgId) metricConditions.push(eq(metricSnapshots.orgId, this.orgId));
+
     const allMetrics = await db
       .select()
       .from(metricSnapshots)
-      .where(gte(metricSnapshots.date, cutoffStr));
+      .where(and(...metricConditions));
 
-    const allAssets = await db.select().from(assets);
-    const allCampaigns = await db.select().from(campaigns);
-    const allAlerts = await db.select().from(alerts);
+    const assetWhere = this.orgId ? eq(assets.orgId, this.orgId) : undefined;
+    const campaignWhere = this.orgId ? eq(campaigns.orgId, this.orgId) : undefined;
+    const alertWhere = this.orgId ? eq(alerts.orgId, this.orgId) : undefined;
+
+    const allAssets = await db.select().from(assets).where(assetWhere);
+    const allCampaigns = await db.select().from(campaigns).where(campaignWhere);
+    const allAlerts = await db.select().from(alerts).where(alertWhere);
 
     const assetMap = new Map(allAssets.map((a) => [a.id, a]));
 
@@ -183,12 +192,83 @@ export class DrizzleMetricRepository implements MetricRepository {
           ? "down"
           : "flat";
 
-    const funnelLeakage: { stage: FunnelStage; dropoffRate: number }[] = [
-      { stage: "tofu", dropoffRate: 0.72 },
-      { stage: "mofu", dropoffRate: 0.58 },
-      { stage: "bofu", dropoffRate: 0.35 },
-      { stage: "retention", dropoffRate: 0.12 },
-    ];
+    // Funnel leakage: computed from real conversion data grouped by asset funnel stage
+    const funnelStageData = new Map<FunnelStage, { clicks: number; conversions: number }>();
+    for (const metric of allMetrics) {
+      const asset = assetMap.get(metric.assetId);
+      if (!asset) continue;
+      const stage = asset.funnelStage as FunnelStage;
+      const existing = funnelStageData.get(stage) ?? { clicks: 0, conversions: 0 };
+      existing.clicks += metric.clicks;
+      existing.conversions += metric.conversions;
+      funnelStageData.set(stage, existing);
+    }
+
+    const funnelStages: FunnelStage[] = ["tofu", "mofu", "bofu", "retention"];
+    const funnelLeakage = funnelStages.map((stage) => {
+      const data = funnelStageData.get(stage);
+      const dropoffRate = data && data.clicks > 0
+        ? Math.round((1 - data.conversions / data.clicks) * 100) / 100
+        : 0;
+      return { stage, dropoffRate };
+    });
+
+    // Budget suggestions: generated from channel efficiency ranking
+    const sortedChannels = [...channelEfficiency].sort((a, b) => {
+      if (a.cpl === 0 && b.cpl === 0) return 0;
+      if (a.cpl === 0) return 1;
+      if (b.cpl === 0) return -1;
+      return a.cpl - b.cpl;
+    });
+
+    const budgetSuggestions: string[] = [];
+    if (sortedChannels.length > 0) {
+      const best = sortedChannels[0];
+      budgetSuggestions.push(
+        `Increase ${best.platform} budget — best CPL at $${best.cpl.toFixed(2)}`
+      );
+    }
+    if (sortedChannels.length > 1) {
+      const worst = sortedChannels[sortedChannels.length - 1];
+      budgetSuggestions.push(
+        `Reduce ${worst.platform} spend — highest CPL at $${worst.cpl.toFixed(2)}`
+      );
+    }
+    // Find improving trend channels
+    for (const ch of sortedChannels.slice(1, -1)) {
+      if (ch.leads > 0 && ch.cpl < (totalLeads > 0 ? totalSpend / totalLeads : 0)) {
+        budgetSuggestions.push(
+          `Growing opportunity on ${ch.platform} — CPL $${ch.cpl.toFixed(2)} below org average`
+        );
+        break;
+      }
+    }
+
+    // Forecasts: 7-day ahead predictions using exponential smoothing
+    const metricsByDate = new Map<string, { cpl: number; spend: number; leads: number }>();
+    for (const metric of allMetrics) {
+      const existing = metricsByDate.get(metric.date) ?? { cpl: 0, spend: 0, leads: 0 };
+      existing.spend += metric.spend;
+      existing.leads += metric.leads;
+      metricsByDate.set(metric.date, existing);
+    }
+    const sortedDates = Array.from(metricsByDate.keys()).sort();
+    const dailyCpl = sortedDates.map((d) => {
+      const data = metricsByDate.get(d)!;
+      return data.leads > 0 ? data.spend / data.leads : 0;
+    });
+    const dailySpend = sortedDates.map((d) => metricsByDate.get(d)!.spend);
+    const dailyLeads = sortedDates.map((d) => metricsByDate.get(d)!.leads);
+
+    const cplForecast = forecast(dailyCpl, 7);
+    const spendForecast = forecast(dailySpend, 7);
+    const leadsForecast = forecast(dailyLeads, 7);
+
+    const forecasts = {
+      nextWeekCpl: Math.round(mean(cplForecast) * 100) / 100,
+      nextWeekSpend: Math.round(spendForecast.reduce((s, v) => s + v, 0) * 100) / 100,
+      nextWeekLeads: Math.round(leadsForecast.reduce((s, v) => s + v, 0)),
+    };
 
     const dateRange = {
       start: cutoffStr,
@@ -209,11 +289,8 @@ export class DrizzleMetricRepository implements MetricRepository {
       bestThemes: themes.slice(0, 3),
       worstThemes: themes.slice(-3).reverse(),
       funnelLeakage,
-      budgetSuggestions: [
-        "Increase LinkedIn carousel budget by 40% — strong CPL performance",
-        "Reduce display retargeting spend by 30% — diminishing returns",
-        "Allocate $2,000/month to YouTube in-stream — growing engagement",
-      ],
+      budgetSuggestions,
+      forecasts,
       activeCampaigns,
       activeAssets,
       alertCount,
