@@ -9,11 +9,14 @@ import type {
   ExecutiveSummary,
   Insight,
   InsightType,
+  IntegrationPlatform,
+  IntegrationStatus,
   MetricSnapshot,
   Alert,
   Organization,
   OrgMember,
   OrgRole,
+  PlatformConnection,
 } from "./types";
 
 export interface AssetRepository {
@@ -64,6 +67,15 @@ export interface OrgRepository {
   removeMember(memberId: string): Promise<boolean>;
 }
 
+export interface PlatformConnectionRepository {
+  getAll(filters?: { platform?: IntegrationPlatform; status?: IntegrationStatus }): Promise<PlatformConnection[]>;
+  getById(id: string): Promise<PlatformConnection | null>;
+  getByPlatform(platform: IntegrationPlatform): Promise<PlatformConnection | null>;
+  create(data: Omit<PlatformConnection, "id" | "createdAt" | "updatedAt">): Promise<PlatformConnection>;
+  update(id: string, data: Partial<Pick<PlatformConnection, "status" | "accessToken" | "refreshToken" | "tokenExpiresAt" | "lastSyncAt" | "lastSyncError" | "accountName">>): Promise<PlatformConnection | null>;
+  delete(id: string): Promise<boolean>;
+}
+
 export interface AutoActionRepository {
   getAll(filters?: { status?: AutoActionStatus }): Promise<AutoAction[]>;
   getById(id: string): Promise<AutoAction | null>;
@@ -79,4 +91,5 @@ export interface Repositories {
   alerts: AlertRepository;
   orgs: OrgRepository;
   autoActions: AutoActionRepository;
+  platformConnections: PlatformConnectionRepository;
 }

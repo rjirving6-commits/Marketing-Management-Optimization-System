@@ -204,6 +204,27 @@ export const insights = pgTable("insights", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const platformConnections = pgTable("platform_connections", {
+  id: text("id").primaryKey(),
+  orgId: text("org_id").references(() => organizations.id, {
+    onDelete: "cascade",
+  }),
+  platform: text("platform").notNull(),
+  accountId: text("account_id").notNull(),
+  accountName: text("account_name").notNull(),
+  status: text("status").notNull().default("disconnected"),
+  accessToken: text("access_token"),
+  refreshToken: text("refresh_token"),
+  tokenExpiresAt: timestamp("token_expires_at"),
+  lastSyncAt: timestamp("last_sync_at"),
+  lastSyncError: text("last_sync_error"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .notNull(),
+});
+
 export const automationActions = pgTable("automation_actions", {
   id: text("id").primaryKey(),
   orgId: text("org_id").references(() => organizations.id, {

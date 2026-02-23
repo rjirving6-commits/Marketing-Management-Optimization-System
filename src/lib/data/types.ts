@@ -259,6 +259,28 @@ export interface ExecutiveSummary {
   alertCount: number;
 }
 
+// ─── Platform Integration Types ─────────────────────────────────
+
+export type IntegrationPlatform = "meta" | "google_ads" | "linkedin";
+
+export type IntegrationStatus = "connected" | "disconnected" | "error";
+
+export interface PlatformConnection {
+  id: string;
+  orgId: string | null;
+  platform: IntegrationPlatform;
+  accountId: string;
+  accountName: string;
+  status: IntegrationStatus;
+  accessToken: string | null;
+  refreshToken: string | null;
+  tokenExpiresAt: string | null;
+  lastSyncAt: string | null;
+  lastSyncError: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // ─── Automation Types ────────────────────────────────────────────
 
 export type AutoActionType =

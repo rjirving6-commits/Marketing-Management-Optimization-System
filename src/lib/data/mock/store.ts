@@ -1,4 +1,4 @@
-import type { Asset, Campaign, MetricSnapshot, Insight, Alert, AutoAction } from "../types";
+import type { Asset, Campaign, MetricSnapshot, Insight, Alert, AutoAction, PlatformConnection } from "../types";
 import {
   seedCampaigns,
   seedAssets,
@@ -6,6 +6,7 @@ import {
   seedInsights,
   seedAlerts,
   seedAutoActions,
+  seedPlatformConnections,
 } from "./seed";
 
 export interface MockStore {
@@ -15,6 +16,7 @@ export interface MockStore {
   insights: Insight[];
   alerts: Alert[];
   autoActions: AutoAction[];
+  platformConnections: PlatformConnection[];
 }
 
 function createStore(): MockStore {
@@ -25,6 +27,7 @@ function createStore(): MockStore {
     insights: [...seedInsights],
     alerts: [...seedAlerts],
     autoActions: [...seedAutoActions],
+    platformConnections: [...seedPlatformConnections],
   };
 }
 
@@ -44,4 +47,5 @@ export function resetStore(): void {
   store.insights = fresh.insights;
   store.alerts = fresh.alerts;
   store.autoActions = fresh.autoActions;
+  store.platformConnections = fresh.platformConnections;
 }

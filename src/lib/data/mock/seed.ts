@@ -5,6 +5,7 @@ import type {
   Insight,
   Alert,
   AutoAction,
+  PlatformConnection,
 } from "../types";
 
 // ─── Campaigns ───────────────────────────────────────────────────
@@ -961,5 +962,55 @@ export const seedAutoActions: AutoAction[] = [
     metadata: { fatigueScore: 65 },
     createdAt: "2026-02-19T08:00:00Z",
     executedAt: null,
+  },
+];
+
+// ─── Platform Connections ───────────────────────────────────────
+
+export const seedPlatformConnections: PlatformConnection[] = [
+  {
+    id: "conn-001",
+    orgId: null,
+    platform: "meta",
+    accountId: "act_123456789",
+    accountName: "RampRight Meta Ads",
+    status: "connected",
+    accessToken: null,
+    refreshToken: null,
+    tokenExpiresAt: "2026-04-01T00:00:00Z",
+    lastSyncAt: "2026-02-22T06:00:00Z",
+    lastSyncError: null,
+    createdAt: "2026-01-10T09:00:00Z",
+    updatedAt: "2026-02-22T06:00:00Z",
+  },
+  {
+    id: "conn-002",
+    orgId: null,
+    platform: "google_ads",
+    accountId: "customers/987-654-3210",
+    accountName: "RampRight Google Ads",
+    status: "connected",
+    accessToken: null,
+    refreshToken: null,
+    tokenExpiresAt: "2026-03-15T00:00:00Z",
+    lastSyncAt: "2026-02-22T06:00:00Z",
+    lastSyncError: null,
+    createdAt: "2026-01-05T10:00:00Z",
+    updatedAt: "2026-02-22T06:00:00Z",
+  },
+  {
+    id: "conn-003",
+    orgId: null,
+    platform: "linkedin",
+    accountId: "urn:li:sponsoredAccount:501234567",
+    accountName: "RampRight LinkedIn Ads",
+    status: "error",
+    accessToken: null,
+    refreshToken: null,
+    tokenExpiresAt: "2026-02-01T00:00:00Z",
+    lastSyncAt: "2026-02-01T06:00:00Z",
+    lastSyncError: "Token expired. Please reconnect.",
+    createdAt: "2026-01-15T11:00:00Z",
+    updatedAt: "2026-02-01T06:00:00Z",
   },
 ];
